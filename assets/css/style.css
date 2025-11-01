@@ -1,0 +1,359 @@
+/* --- Maternal Health Color Palette --- */
+:root {
+    --color-primary: #77c8c4;      /* Calming Teal/Aqua (Main action color) */
+    --color-secondary: #f4b4a6;    /* Soft Peach/Rose (Accent/Warning color) */
+    --color-background: #f8fcfc;   /* Very light, clean background */
+    --color-text-dark: #334e5c;    /* Dark Navy/Slate (Readable text) */
+    --color-white: #ffffff;
+    --color-shadow: rgba(0, 0, 0, 0.15);
+    --color-success: #38a169;      /* Green for successful registration */
+    --color-error: #cc0000;        /* Red for errors */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+}
+
+/* --- Header and Logo --- */
+header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.logo-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 400;
+}
+header .fas {
+    font-size: 2rem;
+}
+
+/* --- Main Layout --- */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align forms to the top */
+    padding: 40px 20px;
+}
+
+.form-card {
+    background: var(--color-white);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px var(--color-shadow);
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-card h2 {
+    text-align: center;
+    color: var(--color-text-dark);
+    margin-bottom: 25px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+/* --- Tab Selector (Login/Register Buttons) --- */
+.tab-selector {
+    display: flex;
+    margin-bottom: 25px;
+}
+
+.tab {
+    flex-grow: 1;
+    padding: 15px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #888;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+    color: var(--color-primary);
+    border-bottom: 3px solid var(--color-primary);
+    font-weight: 700;
+}
+
+/* --- Form Input Styles --- */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group-row {
+    display: flex;
+    gap: 15px;
+}
+
+.input-group-row .input-group {
+    flex: 1;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+}
+label .fas {
+    margin-right: 5px;
+    color: var(--color-primary);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+    outline: none;
+}
+
+/* Password Toggle Styling */
+.password-toggle-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: var(--color-primary);
+}
+
+/* --- Buttons --- */
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 30px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #5aa7a4; 
+}
+
+/* --- Utility Classes & Status Messages --- */
+.hidden {
+    display: none;
+}
+
+.id-note {
+    background-color: #f0fafa; 
+    border-left: 5px solid var(--color-secondary);
+    padding: 12px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+    border-radius: 4px;
+}
+
+.status-message {
+    padding: 15px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-message .fas {
+    margin-right: 8px;
+}
+
+.status-message.success {
+    background-color: #e6f9ed;
+    color: var(--color-success); 
+    border: 1px solid var(--color-success);
+}
+
+.status-message.error {
+    background-color: #fcebeb;
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+
+/* --- Dashboard Specific Styles --- */
+.dashboard-main {
+    padding: 20px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.main-header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo-link {
+    color: var(--color-white);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+nav a {
+    color: var(--color-white);
+    text-decoration: none;
+    margin-left: 25px;
+    padding: 5px 0;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: var(--color-secondary);
+}
+
+.welcome-banner {
+    background-color: #eaf8f8; /* Very light teal */
+    color: var(--color-text-dark);
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border-left: 5px solid var(--color-primary);
+}
+.welcome-banner h2 {
+    margin-bottom: 5px;
+    font-size: 1.8rem;
+}
+
+/* --- Dashboard Grid Layout --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.metric-card {
+    background: var(--color-white);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-card h3 {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.icon-box {
+    float: right;
+    font-size: 2rem;
+    color: var(--color-secondary);
+}
+
+.data-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+.status-indicator {
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.status-indicator.normal {
+    color: var(--color-success, #38a169);
+}
+
+.status-indicator.alert {
+    color: var(--color-error, #cc0000);
+    font-weight: 700;
+}
+
+/* --- Chart and Doctor Card Styles --- */
+.chart-container {
+    grid-column: 1 / span 2;
+    background: var(--color-white);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.chart-container h3 {
+    margin-bottom: 15px;
+    color: var(--color-primary);
+}
+
+.doctor-info-card {
+    grid-column: 3 / 4;
+    background: var(--color-white);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.doctor-info-card h3 {
+    color: var(--color-text-dark);
+    margin-bottom: 15px;
+}
+.unassigned-alert {
+    padding: 10px;
+    background-color: var(--color-secondary);
+    border-radius: 5px;
+    color: var(--color-text-dark);
+}
