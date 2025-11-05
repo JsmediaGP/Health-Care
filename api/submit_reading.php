@@ -71,8 +71,8 @@ try {
     // Skip insertion if the signal is clearly invalid
     if ($signal !== 'NO_SIGNAL') {
         $insert = $pdo->prepare("
-            INSERT INTO readings (patient_fk, heart_rate, spo2, temperature, acc_ax, acc_ay, acc_az)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO readings (patient_fk, heart_rate, spo2, temperature, acc_ax, acc_ay, acc_az, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $insert->execute([$patient_pk, $heart_rate, $spo2, $temp, $ax, $ay, $az]);
     }

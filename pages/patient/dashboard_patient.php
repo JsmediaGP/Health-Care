@@ -1,5 +1,5 @@
 <?php
-// Set a page title variable for the header
+// Define required variables before including the header
 $page_title = "Patient Dashboard";
 $required_role = "patient";
 
@@ -8,23 +8,26 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'patient') {
-    // Use the index page for login/unauthorized access
+    // Redirect to login page
     header('Location: ../../index.php'); 
     exit;
 }
+
 // Now include the header, which also loads the DB connection and patient name
 include '../../includes/header.php'; // NOTE: header.php must load Moment.js and Chart.js
 
 // Current Patient ID from session
 $patient_id = $_SESSION['user_id']; 
 
-// 2. Fetch Latest Vital Signs
+// 2. Fetch Latest Vital Signs (All 7 fields)
 try {
-    // Get the latest reading based on the user_fk (PID)
+    // Query to get the latest reading based on the user_fk (PID)
     $stmt_latest = $pdo->prepare("
         SELECT 
             t4.heart_rate, 
             t4.spo2, 
+            t4.temperature,
+            t4.acc_ax, t4.acc_ay, t4.acc_az,
             t4.timestamp 
         FROM users t1
         JOIN patients t3 ON t1.user_id = t3.user_fk
@@ -38,15 +41,30 @@ try {
 
     $heart_rate = $latest_reading['heart_rate'] ?? 'N/A';
     $spo2 = $latest_reading['spo2'] ?? 'N/A';
+    $temperature = $latest_reading['temperature'] ?? 'N/A';
+    $acc_ax = $latest_reading['acc_ax'] ?? 'N/A';
+    $acc_ay = $latest_reading['acc_ay'] ?? 'N/A';
+    $acc_az = $latest_reading['acc_az'] ?? 'N/A';
     $last_updated = $latest_reading['timestamp'] ? date('M d, Y h:i A', strtotime($latest_reading['timestamp'])) : 'No data yet.';
+    
+    // Calculate Acceleration Magnitude for simplified display
+    $acc_magnitude = (is_numeric($acc_ax) && is_numeric($acc_ay) && is_numeric($acc_az))
+        ? sqrt($acc_ax * $acc_ax + $acc_ay * $acc_ay + $acc_az * $acc_az)
+        : 'N/A';
 
 } catch (PDOException $e) {
     // Simple error handling
     $latest_reading = null;
-    $heart_rate = 'DB Error';
-    $spo2 = 'DB Error';
+    $heart_rate = $spo2 = $temperature = $acc_ax = $acc_ay = $acc_az = 'DB Error';
+    $acc_magnitude = 'DB Error';
     $last_updated = 'Could not fetch data.';
 }
+
+// --- Define Clinical Alert Conditions (Based on Pregnancy Vitals) ---
+$is_hr_alert = (is_numeric($heart_rate) && ($heart_rate > 120 || $heart_rate < 50));
+$is_spo2_alert = (is_numeric($spo2) && $spo2 < 95);
+$is_temp_alert = (is_numeric($temperature) && $temperature >= 37.8);
+$is_overall_alert = $is_hr_alert || $is_spo2_alert || $is_temp_alert;
 
 ?>
 
@@ -56,8 +74,8 @@ try {
         <div class="icon-box"><i class="fas fa-heartbeat"></i></div>
         <h3>Heart Rate (BPM)</h3>
         <p class="data-value"><?= $heart_rate ?></p>
-        <p class="status-indicator <?= ($heart_rate > 100 || $heart_rate < 60) && is_numeric($heart_rate) ? 'alert' : 'normal' ?>">
-            <i class="fas fa-circle"></i> Status: <?= ($heart_rate > 100 || $heart_rate < 60) && is_numeric($heart_rate) ? 'Check' : 'Normal' ?>
+        <p class="status-indicator <?= $is_hr_alert ? 'alert' : 'normal' ?>">
+            <i class="fas fa-circle"></i> Status: <?= $is_hr_alert ? 'ALERT' : 'Normal' ?>
         </p>
     </div>
 
@@ -65,8 +83,17 @@ try {
         <div class="icon-box"><i class="fas fa-lungs"></i></div>
         <h3>Oxygen Saturation ($\text{SpO}_2$ %)</h3>
         <p class="data-value"><?= $spo2 ?></p>
-        <p class="status-indicator <?= ($spo2 < 95) && is_numeric($spo2) ? 'alert' : 'normal' ?>">
-            <i class="fas fa-circle"></i> Status: <?= ($spo2 < 95) && is_numeric($spo2) ? 'Low' : 'Healthy' ?>
+        <p class="status-indicator <?= $is_spo2_alert ? 'alert' : 'normal' ?>">
+            <i class="fas fa-circle"></i> Status: <?= $is_spo2_alert ? 'Low' : 'Healthy' ?>
+        </p>
+    </div>
+
+    <div class="metric-card temp-card card">
+        <div class="icon-box"><i class="fas fa-thermometer-half"></i></div>
+        <h3>Temperature ($\circ\text{C}$)</h3>
+        <p class="data-value"><?= is_numeric($temperature) ? number_format($temperature, 2) : $temperature ?></p>
+        <p class="status-indicator <?= $is_temp_alert ? 'alert' : 'normal' ?>">
+            <i class="fas fa-circle"></i> Status: <?= $is_temp_alert ? 'Fever' : 'Normal' ?>
         </p>
     </div>
 
@@ -75,21 +102,30 @@ try {
         <div class="vitals-row">
             <div class="vitals-item">
                 <span class="value-label">Heart Rate:</span>
-                <span class="value <?= ($heart_rate > 100 || $heart_rate < 60) && is_numeric($heart_rate) ? 'alert-text' : 'normal-text' ?>">
+                <span class="value <?= $is_hr_alert ? 'alert-text' : 'normal-text' ?>">
                     <?= $heart_rate ?> BPM
                 </span>
             </div>
             <div class="vitals-item">
                 <span class="value-label">SpO2:</span>
-                <span class="value <?= ($spo2 < 95) && is_numeric($spo2) ? 'alert-text' : 'normal-text' ?>">
+                <span class="value <?= $is_spo2_alert ? 'alert-text' : 'normal-text' ?>">
                     <?= $spo2 ?> %
                 </span>
             </div>
         </div>
 
-        <p class="status-indicator <?= ($heart_rate > 100 || $heart_rate < 60 || $spo2 < 95) && is_numeric($heart_rate) ? 'alert' : 'normal' ?>">
+        <p class="status-indicator <?= $is_overall_alert ? 'alert' : 'normal' ?>">
             <i class="fas fa-circle"></i> Overall Status: 
-            <?= ($heart_rate > 100 || $heart_rate < 60 || $spo2 < 95) && is_numeric($heart_rate) ? 'Review Required' : 'Stable' ?>
+            <?= $is_overall_alert ? 'Review Required' : 'Stable' ?>
+        </p>
+    </div>
+
+    <div class="metric-card acc-card card">
+        <div class="icon-box"><i class="fas fa-running"></i></div>
+        <h3>Acceleration (G)</h3>
+        <p class="data-value"><?= is_numeric($acc_magnitude) ? number_format($acc_magnitude, 2) : $acc_magnitude ?></p>
+        <p class="status-indicator normal">
+            <i class="fas fa-info-circle"></i> Components: X: <?= number_format($acc_ax, 2) ?> | Y: <?= number_format($acc_ay, 2) ?> | Z: <?= number_format($acc_az, 2) ?>
         </p>
     </div>
     

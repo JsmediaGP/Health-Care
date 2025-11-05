@@ -719,3 +719,130 @@ nav a:hover {
 
 
 
+/* ======================================= */
+/* 1. General Layout and Container Styling */
+/* ======================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+
+h2 {
+    color: #007bff; /* Primary color */
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* ======================================= */
+/* 2. Dynamic Toggle Button Styling */
+/* ======================================= */
+.btn-group button {
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 0.25rem !important;
+    margin-right: 5px;
+    padding: 10px 15px;
+}
+
+/* Active State for Normal Readings */
+#btn-readings.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Active State for Alert History */
+#btn-alerts.active {
+    background-color: #dc3545; /* Red for alerts */
+    border-color: #dc3545;
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+/* Inactive Button Style */
+.btn-secondary {
+    background-color: #f8f9fa; 
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+/* ======================================= */
+/* 3. History Table Styling (Applies to both) */
+/* ======================================= */
+#historyTable {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Professional shadow */
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden; /* Clips the shadow and table content cleanly */
+}
+
+#historyTable thead th {
+    /* Header style */
+    background-color: #343a40; /* Darker header for contrast */
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 12px 15px;
+    border-bottom: 3px solid #007bff; /* Primary color underline */
+    text-align: left;
+}
+
+#historyTable tbody td {
+    padding: 10px 15px;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+/* Zebra striping provided by Bootstrap's .table-striped, but added clarity here */
+#historyTable tbody tr:nth-child(even) {
+    background-color: #f7f7f7;
+}
+
+#historyTable tbody tr:hover {
+    background-color: #e9ecef; /* Light gray on hover */
+    cursor: default;
+}
+
+/* ======================================= */
+/* 4. Badge and Status Formatting */
+/* ======================================= */
+.badge {
+    padding: 0.4em 0.8em;
+    font-size: 85%;
+    font-weight: 700;
+    border-radius: 0.25rem;
+    text-transform: uppercase;
+}
+
+/* Alert Type Badge (Used in Alerts Table) */
+.badge-danger {
+    color: #fff;
+    background-color: #dc3545;
+}
+
+/* Status Badges (Used in Alerts Table) */
+.badge-success {
+    color: #fff;
+    background-color: #28a745; /* READ status */
+}
+
+.badge-warning {
+    color: #212529;
+    background-color: #ffc107; /* UNREAD status */
+}
+
+/* Loading Message */
+#loading-message {
+    font-size: 1.1rem;
+    color: #6c757d;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    border-radius: 0.25rem;
+    margin-top: 20px;
+}

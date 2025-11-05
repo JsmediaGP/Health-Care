@@ -95,6 +95,7 @@ if (!isset($skip_auth) || $skip_auth !== true) {
                 <a href="../doctor/profile.php" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], 'profile.php') !== false ? 'active' : '' ?>"><i class="fas fa-user-md"></i> Profile</a>
             <?php else: ?>
                 <a href="../patient/dashboard_patient.php" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], 'dashboard_patient.php') !== false ? 'active' : '' ?>"><i class="fas fa-chart-line"></i> Live Data</a>
+                <a href="../patient/history_patient.php" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], 'history_patient.php') !== false ? 'active' : '' ?>"><i class="fas fa-history"></i> History & Alerts</a>
                 <a href="../patient/profile.php" class="nav-item <?= strpos($_SERVER['REQUEST_URI'], 'profile.php') !== false ? 'active' : '' ?>"><i class="fas fa-user-circle"></i> Profile</a>
             <?php endif; ?>
             <a href="../../engine/auth_process.php?action=logout" class="nav-item logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
