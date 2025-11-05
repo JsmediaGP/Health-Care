@@ -357,3 +357,365 @@ nav a:hover {
     border-radius: 5px;
     color: var(--color-text-dark);
 }
+
+
+/* --- Profile Page Styles --- */
+.profile-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    padding: 30px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.card {
+    background: var(--color-white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.profile-details h2, .profile-assignment h2 {
+    color: var(--color-primary);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+}
+.profile-details h2 .fas, .profile-assignment h2 .fas {
+    margin-right: 10px;
+}
+
+.detail-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px dashed #f0f0f0;
+}
+
+.detail-label {
+    flex: 1;
+    font-weight: 600;
+    color: #666;
+}
+
+.detail-value {
+    flex: 2;
+    color: var(--color-text-dark);
+}
+
+.detail-value.highlight {
+    font-weight: 700;
+    color: var(--color-secondary);
+}
+
+.detail-value.address-block {
+    white-space: pre-wrap; /* Preserve line breaks from nl2br() */
+}
+
+.detail-note {
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-size: 0.95rem;
+}
+
+.detail-note.alert {
+    background-color: #fcebeb; /* Light red */
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+.detail-note.info {
+    background-color: #eaf8f8; /* Light teal */
+    color: var(--color-text-dark);
+    border: 1px solid var(--color-primary);
+}
+
+.btn-secondary {
+    padding: 12px 20px;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-white);
+    color: var(--color-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #f0fafa;
+}
+
+.btn-primary-alt {
+    /* Style this to contrast slightly with the primary button */
+    padding: 12px 20px;
+    border: none;
+    background-color: var(--color-secondary);
+    color: var(--color-text-dark);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary-alt:hover {
+    background-color: #f7c9c0;
+}
+
+
+
+
+/* --- Doctor Dashboard Styles --- */
+
+/* Statistics Grid */
+.doctor-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--color-white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 5px solid var(--color-primary);
+}
+
+.stat-card h3 {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+/* Alert State for Stat Card */
+.alert-patients {
+    border-left: 5px solid var(--color-error); /* Default warning color */
+}
+
+.alert-patients.alert-active {
+    background-color: #ffe0e0; /* Light red background when alerts are active */
+    animation: pulse-red 2s infinite;
+}
+
+/* Triage Table Container */
+.patient-list-container {
+    padding: 30px;
+}
+
+.triage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.triage-table th, .triage-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.triage-table th {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.triage-table tbody tr:hover {
+    background-color: #f7f7f7;
+}
+
+/* Status Indicators */
+.status-cell {
+    font-weight: 700;
+    text-align: center;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.status-normal {
+    color: var(--color-success);
+    background-color: #e6f7ed;
+}
+
+.status-alert {
+    color: var(--color-error);
+    background-color: #fcebeb;
+    animation: flash-border 1s infinite alternate; /* Visual cue for the row */
+}
+
+/* High/Low Reading Highlighting */
+.reading-high {
+    color: var(--color-error); /* Used for high Heart Rate */
+    font-weight: 700;
+}
+
+.reading-low {
+    color: var(--color-error); /* Used for low SpO2 */
+    font-weight: 700;
+}
+
+/* Action Button in Table */
+.btn-view-detail {
+    background-color: var(--color-secondary);
+    color: var(--color-text-dark);
+    padding: 6px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-view-detail:hover {
+    background-color: #f7c9c0;
+}
+
+/* No Patients Message */
+.no-patients-message {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+    font-size: 1.1rem;
+}
+
+.no-patients-message .fas {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #ccc;
+}
+
+/* Keyframe Animations */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+@keyframes flash-border {
+    from { border-left: 5px solid var(--color-error); }
+    to { border-left: 5px solid rgba(255, 0, 0, 0.4); }
+}
+
+/* --- Patient Detail View (Doctor) Styles --- */
+
+.detail-header {
+    padding: 20px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 30px;
+}
+
+.detail-header h1 {
+    font-size: 2rem;
+    color: var(--color-text-dark);
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.detail-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    padding: 0 40px;
+    max-width: 1400px;
+    margin: 0 auto 30px;
+}
+
+/* Reusing metric-card from patient dashboard, but adjusting size */
+.detail-summary-grid .metric-card {
+    padding: 20px;
+    text-align: center;
+}
+
+.detail-summary-grid .data-value {
+    font-size: 2rem;
+}
+
+.info-card {
+    background: var(--color-white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 5px solid var(--color-secondary);
+}
+
+.info-card h3 {
+    font-size: 1rem;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
+
+.info-card p {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.detail-chart-area {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto 30px;
+}
+
+.detail-chart-area h2 {
+    color: var(--color-primary);
+    margin-bottom: 20px;
+}
+
+.detail-actions {
+    max-width: 1400px;
+    margin: 0 auto 50px;
+    padding: 0 40px;
+}
+
+.detail-actions button {
+    margin-right: 15px;
+}
+
+/* Badge for status */
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-assigned {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+
+
+
+
+
+
+
+
+
+
+
