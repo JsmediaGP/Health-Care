@@ -1,210 +1,198 @@
 <?php
 /**
- * DOCTOR DASHBOARD (TRIAGE & OVERSIGHT VIEW)
- * Displays patients with pending alerts and a list of all assigned patients.
+ * DOCTOR DASHBOARD (TRIAGE & OVERVIEW)
+ * 1. Key Metrics (Counts)
+ * 2. Urgent Patient Table (Pending Alerts) -> Links to Alert Page
+ * 3. All Assigned Patients Table (Monitoring) -> Links to Patient Detail Page
  */
 
-// Define required variables before including the header
 $page_title = "Doctor Dashboard";
-$required_role = "doctor"; 
+$required_role = "doctor";
 
-// Include Header (handles session check, DB connection ($pdo), and fetches $user_id)
-include '../../includes/header.php'; 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+include '../../includes/header.php'; // Includes DB connection ($pdo) and auth check
 
-// Initialize data arrays
-$assigned_patients = [];
-$triage_patients = [];
-$alert_count = 0;
+$doctor_user_id = $_SESSION['user_id'];
+$doctor_pk = null;
 $error_message = null;
 
-// Fetch the Doctor's internal primary key (doctor_pk)
+// Data containers
+$counts = ['patients' => 0, 'pending_alerts' => 0];
+$urgent_patients = [];
+$all_patients = [];
+
 try {
-    $stmt_pk = $pdo->prepare("SELECT doctor_pk FROM doctors WHERE user_fk = ?");
-    $stmt_pk->execute([$user_id]);
-    $doctor_pk = $stmt_pk->fetchColumn();
-    
+    // 1. Get the Doctor's Primary Key (PK)
+    $stmt_doc = $pdo->prepare("SELECT doctor_pk FROM doctors WHERE user_fk = ?");
+    $stmt_doc->execute([$doctor_user_id]);
+    $doctor_pk = $stmt_doc->fetchColumn();
+
     if (!$doctor_pk) {
-        $error_message = "Doctor profile data not found.";
+        $error_message = "Your doctor profile could not be found.";
         goto render_page;
     }
 
-    // --- Query 1: Fetch ALL assigned patients and their latest readings (OVERSIGHT LIST) ---
-    $stmt_all_patients = $pdo->prepare("
+    // 2. Fetch All Assigned Patients (for the "All Patients" table and counts)
+    $stmt_all = $pdo->prepare("
         SELECT 
+            p.user_fk AS patient_id,
             p.patient_pk,
-            p.user_fk AS patient_id, 
             p.first_name, 
             p.last_name,
-            r.heart_rate,
-            r.spo2,
-            r.timestamp
+            (
+                SELECT COUNT(alert_id) 
+                FROM alerts 
+                WHERE patient_fk = p.patient_pk AND status = 'UNREAD'
+            ) AS pending_alerts_count,
+            (
+                SELECT timestamp 
+                FROM readings 
+                WHERE patient_fk = p.patient_pk 
+                ORDER BY timestamp DESC 
+                LIMIT 1
+            ) AS last_reading_time
         FROM patients p
-        LEFT JOIN (
-            -- Subquery to get only the LATEST reading for each patient
-            SELECT 
-                patient_fk, heart_rate, spo2, timestamp,
-                ROW_NUMBER() OVER(PARTITION BY patient_fk ORDER BY timestamp DESC) as rn
-            FROM readings
-        ) r ON r.patient_fk = p.patient_pk AND r.rn = 1
         WHERE p.assigned_doctor_fk = ?
         ORDER BY p.last_name ASC
     ");
-    $stmt_all_patients->execute([$doctor_pk]);
-    $assigned_patients = $stmt_all_patients->fetchAll(PDO::FETCH_ASSOC);
+    $stmt_all->execute([$doctor_pk]);
+    $all_patients = $stmt_all->fetchAll(PDO::FETCH_ASSOC);
 
-
-    // --- Query 2: Fetch patients with UNREAD or UNRESOLVED Alerts (TRIAGE LIST) ---
-    $stmt_triage = $pdo->prepare("
-        SELECT 
-            p.user_fk AS patient_id,
-            p.first_name,
-            p.last_name,
-            a.alert_type,
-            a.value AS alert_value,  /* CORRECTED COLUMN NAME: 'value' */
-            a.recorded_at,
-            a.status
-        FROM patients p
-        JOIN alerts a ON a.patient_fk = p.patient_pk
-        -- Filtering for UNREAD status (most urgent to display)
-        WHERE p.assigned_doctor_fk = ? AND a.status = 'UNREAD' 
-        -- Grouping to ensure one row per patient, effectively showing the latest UNREAD alert
-        GROUP BY p.patient_pk
-        ORDER BY a.recorded_at DESC
-    ");
-    $stmt_triage->execute([$doctor_pk]);
-    $triage_patients = $stmt_triage->fetchAll(PDO::FETCH_ASSOC);
+    $counts['patients'] = count($all_patients);
     
-    $alert_count = count($triage_patients);
+    // 3. Separate Urgent Patients and calculate total pending alerts
+    foreach ($all_patients as $patient) {
+        $counts['pending_alerts'] += $patient['pending_alerts_count'];
+        if ($patient['pending_alerts_count'] > 0) {
+            $urgent_patients[] = $patient;
+        }
+    }
 
 } catch (PDOException $e) {
-    $error_message = "Database Error: Unable to load patient data. " . $e->getMessage();
+    $error_message = "Database Error: " . $e->getMessage();
 }
 
 render_page:
 ?>
-
-<section class="doctor-dashboard-main container mt-4">
+<main class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-notes-medical"></i> Doctor Dashboard: Triage Center</h2>
     
     <?php if ($error_message): ?>
-        <div class="alert alert-danger mb-4"><?= $error_message ?></div>
+        <div class="alert alert-danger"><?= $error_message ?></div>
+        <?php include '../../includes/footer.php'; exit; ?>
     <?php endif; ?>
 
-    <div class="doctor-stats-grid mb-4">
-        <div class="stat-card total-patients card p-3">
-            <h3><i class="fas fa-users"></i> Total Assigned Patients</h3>
-            <p class="stat-value h1 mb-0"><?= count($assigned_patients) ?></p>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-info text-white shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-users"></i> Total Assigned Patients</h5>
+                        <h1 class="display-4"><?= $counts['patients'] ?></h1>
+                    </div>
+                    <p class="card-text">Total patients under your direct care.</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card alert-patients card p-3 <?= $alert_count > 0 ? 'alert-active border-danger' : '' ?>">
-            <h3><i class="fas fa-exclamation-triangle"></i> Pending Triage Alerts</h3>
-            <p class="stat-value h1 mb-0 text-danger"><?= $alert_count ?></p>
+        <div class="col-md-6">
+            <div class="card <?= ($counts['pending_alerts'] > 0) ? 'bg-danger' : 'bg-success' ?> text-white shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-exclamation-triangle"></i> Pending Triage Alerts</h5>
+                        <h1 class="display-4"><?= $counts['pending_alerts'] ?></h1>
+                    </div>
+                    <p class="card-text">Alerts requiring immediate review and resolution.</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <ul class="nav nav-tabs" id="doctorTabs" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" id="triage-tab" data-toggle="tab" href="#triage" role="tab" aria-controls="triage" aria-selected="true">
-                <i class="fas fa-exclamation-circle"></i> **Triage List (Alerts)**
-                <?php if ($alert_count > 0): ?>
-                    <span class="badge badge-danger ml-2"><?= $alert_count ?></span>
+    <hr/>
+
+    <div class="card mb-4 shadow-lg border-danger">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-bell"></i> **URGENT: Patients with Pending Alerts**</h4>
+            <span class="badge badge-light badge-pill"><?= count($urgent_patients) ?> Patient(s)</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <?php if (count($urgent_patients) > 0): ?>
+                <table class="table table-striped table-hover mb-0">
+                    <thead>
+                        <tr class="table-warning">
+                            <th>Patient Name</th>
+                            <th>Pending Alerts</th>
+                            <th>Last Reading</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($urgent_patients as $patient): ?>
+                        <tr class="table-danger">
+                            <td><?= htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']) ?></td>
+                            <td><span class="badge badge-danger"><?= $patient['pending_alerts_count'] ?></span></td>
+                            <td><?= $patient['last_reading_time'] ? date('M d, Y H:i', strtotime($patient['last_reading_time'])) : 'N/A' ?></td>
+                            <td>
+                                <a href="alert_page.php?pid=<?= htmlspecialchars($patient['patient_id']) ?>" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-gavel"></i> Review Alert
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                    <div class="alert alert-success m-3">
+                        <i class="fas fa-check-circle"></i> **Great!** No urgent alerts require triage at this moment.
+                    </div>
                 <?php endif; ?>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="all-patients-tab" data-toggle="tab" href="#all-patients" role="tab" aria-controls="all-patients" aria-selected="false">
-                <i class="fas fa-notes-medical"></i> All Patients (Oversight)
-            </a>
-        </li>
-    </ul>
-
-    <div class="tab-content card p-3" id="doctorTabsContent">
-        
-        <div class="tab-pane fade show active" id="triage" role="tabpanel" aria-labelledby="triage-tab">
-            <h3 class="mt-2 mb-3">Patients with Pending Alerts</h3>
-            <?php if (empty($triage_patients)): ?>
-                <div class="no-patients-message alert alert-success text-center">
-                    <i class="fas fa-check-circle"></i>
-                    <p class="mb-0">All assigned patients are currently stable or alerts have been addressed.</p>
-                </div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="triage-table table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Patient ID</th>
-                                <th>Name</th>
-                                <th>Latest Alert Type</th>
-                                <th>Trigger Value</th>
-                                <th>Recorded At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($triage_patients as $patient): ?>
-                                <tr class="table-danger"> <td><?= $patient['patient_id'] ?></td>
-                                    <td><?= $patient['first_name'] . ' ' . $patient['last_name'] ?></td>
-                                    <td><span class="badge badge-danger"><?= htmlspecialchars($patient['alert_type']) ?></span></td>
-                                    <td><?= number_format($patient['alert_value'], 2) ?></td>
-                                    <td><?= date('Y-m-d H:i', strtotime($patient['recorded_at'])) ?></td>
-                                    <td>
-                                        <a href="patient_detail.php?pid=<?= $patient['patient_id'] ?>" class="btn btn-sm btn-danger"><i class="fas fa-eye"></i> View & Address</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="tab-pane fade" id="all-patients" role="tabpanel" aria-labelledby="all-patients-tab">
-            <h3 class="mt-2 mb-3">All Assigned Patients and Vitals</h3>
-            <?php if (empty($assigned_patients)): ?>
-                <div class="no-patients-message alert alert-info text-center">
-                    <i class="fas fa-user-times"></i>
-                    <p class="mb-0">You currently have no patients assigned to you.</p>
-                </div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="triage-table table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Patient ID</th>
-                                <th>Name</th>
-                                <th>Latest HR (BPM)</th>
-                                <th>Latest SpO2 (%)</th>
-                                <th>Last Updated</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($assigned_patients as $patient): 
-                                $hr = $patient['heart_rate'] ?? 'N/A';
-                                $spo2 = $patient['spo2'] ?? 'N/A';
-                                $timestamp = $patient['timestamp'] ? date('Y-m-d H:i', strtotime($patient['timestamp'])) : 'No Reading';
-                                
-                                // Simple visual check for a warning color on the row
-                                $status_class = (is_numeric($hr) && ($hr > 100 || $spo2 < 95)) ? 'table-warning' : '';
-                            ?>
-                            <tr class="<?= $status_class ?>">
-                                <td><?= $patient['patient_id'] ?></td>
-                                <td><?= $patient['first_name'] . ' ' . $patient['last_name'] ?></td>
-                                <td><?= $hr ?></td>
-                                <td><?= $spo2 ?></td>
-                                <td><?= $timestamp ?></td>
-                                <td>
-                                    <a href="patient_detail.php?pid=<?= $patient['patient_id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> View Detail</a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
-</section>
+    
+    <hr/>
+
+    <div class="card mb-4 shadow-lg border-primary">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-hospital-user"></i> **All Assigned Patients**</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Patient ID</th>
+                            <th>Last Reading</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        // Loop through all patients, including those not currently urgent
+                        foreach ($all_patients as $patient): 
+                        ?>
+                        <tr>
+                            <td><?= htmlspecialchars($patient['first_name'] . ' ' . $patient['last_name']) ?></td>
+                            <td><?= htmlspecialchars($patient['patient_id']) ?></td>
+                            <td><?= $patient['last_reading_time'] ? date('M d, Y H:i', strtotime($patient['last_reading_time'])) : 'N/A' ?></td>
+                            <td>
+                                <a href="patient_detail.php?pid=<?= htmlspecialchars($patient['patient_id']) ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
 
 <?php 
-// Include the footer file 
 include '../../includes/footer.php'; 
 ?>
